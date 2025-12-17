@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    # Update the URL, username and password to match your MySQL server
+    url: jdbc:mysql://localhost:3306/identity_service?createDatabaseIfNotExist=true&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
