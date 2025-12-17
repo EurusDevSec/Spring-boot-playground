@@ -10,4 +10,8 @@ public class HelloController {
         return "Hello World! I will be a Devops Engineer.";
 
     }
+    @GetMapping("Goodbye")
+    public String sayGoodbye(){
+        return "GoodBye!";
+    }
 }
