@@ -1,0 +1,14 @@
+## Tao User moi
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "eurus_techLead",
+  "password": "StrongPassword123!",
+  "firstName": "Eurus",
+  "lastName": "Dev",
+  "dob": "2004-03-02"
+}
+
+### Lay danh sach User (GET)
+GET http://localhost:8080/users
