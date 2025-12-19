@@ -5,6 +5,7 @@ import com.eurus.Identity_Service.dto.request.UserCreationRequest;
 import com.eurus.Identity_Service.dto.request.UserUpdateRequest;
 import com.eurus.Identity_Service.entity.User;
 import com.eurus.Identity_Service.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping // Tao moi user
-    User createUser(@RequestBody UserCreationRequest request){
+    User createUser(@RequestBody @Valid UserCreationRequest request){
         return userService.createUser(request);
     }
     @GetMapping // Lay danh sach User
