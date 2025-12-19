@@ -2,6 +2,7 @@ package com.eurus.Identity_Service.controller;
 
 
 import com.eurus.Identity_Service.dto.request.UserCreationRequest;
+import com.eurus.Identity_Service.dto.request.UserUpdateRequest;
 import com.eurus.Identity_Service.entity.User;
 import com.eurus.Identity_Service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +31,8 @@ public class UserController {
         return  userService.getUser(userId);
     }
     @PutMapping("/{userId}")
+    User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        return userService.updateUser(userId, request);
+    }
 
 }
