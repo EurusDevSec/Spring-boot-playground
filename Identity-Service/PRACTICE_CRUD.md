@@ -23,19 +23,75 @@ Hãy bổ sung thêm 2 chức năng còn thiếu:
 ### Gợi ý (Hint)
 
 #### 1. Update User (`PUT /users/{userId}`)
-- **Controller**: Cần một method lắng nghe `@PutMapping("/{userId}")`.
-    - Input: `userId` (từ path) và `UserUpdateRequest` (từ body - bạn cần tạo class DTO này tương tự `UserCreationRequest`).
-- **Service**: Tạo method `updateUser(String userId, UserUpdateRequest request)`.
-    - Bước 1: Tìm user cũ bằng `findById`. Nếu không thấy thì báo lỗi.
-    - Bước 2: Cập nhật các trường thông tin từ `request` vào `user` vừa tìm được.
-    - Bước 3: Gọi `userRepository.save(user)` để lưu lại.
-- **Repository**: Không cần viết thêm gì, hàm `save()` của JPA sẽ tự hiểu là update nếu object đã có ID.
+- **Bước 1: Định nghĩa DTO**
+  Mở file `src/main/java/com/eurus/Identity_Service/dto/request/UserUpdateRequest.java` và thêm các trường bạn muốn cho phép cập nhật (thường không cho update username).
+  ```java
+  // UserUpdateRequest.java
+  package com.eurus.Identity_Service.dto.request;
+  
+  import lombok.*;
+  import lombok.experimental.FieldDefaults;
+  import java.time.LocalDate;
+
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public class UserUpdateRequest {
+      String password;
+      String firstName;
+      String lastName;
+      LocalDate dob;
+  }
+  ```
+
+- **Bước 2: Service Layer**
+  Trong `UserService.java`, viết hàm `updateUser`.
+  ```java
+  // UserService.java
+  public User updateUser(String userId, UserUpdateRequest request) {
+      // 1. Tìm user trong DB, nếu không thấy thì báo lỗi
+      User user = getUser(userId); // Tận dụng hàm getUser đã viết
+
+      // 2. Cập nhật thông tin từ request vào user entity
+      user.setPassword(request.getPassword());
+      user.setFirstName(request.getFirstName());
+      user.setLastName(request.getLastName());
+      user.setDob(request.getDob());
+
+      // 3. Lưu xuống DB
+      return userRepository.save(user);
+  }
+  ```
+
+- **Bước 3: Controller Layer**
+  Trong `UserController.java`, thêm API endpoint.
+  ```java
+  // UserController.java
+  @PutMapping("/{userId}")
+  User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+      return userService.updateUser(userId, request);
+  }
+  ```
 
 #### 2. Delete User (`DELETE /users/{userId}`)
-- **Controller**: Cần một method lắng nghe `@DeleteMapping("/{userId}")`.
-- **Service**: Tạo method `deleteUser(String userId)`.
-    - Gọi `userRepository.deleteById(userId)`.
-- **Repository**: Có sẵn `deleteById`.
+- **Service Layer**:
+  ```java
+  // UserService.java
+  public void deleteUser(String userId) {
+      userRepository.deleteById(userId);
+  }
+  ```
+- **Controller Layer**:
+  ```java
+  // UserController.java
+  @DeleteMapping("/{userId}")
+  String deleteUser(@PathVariable String userId) {
+      userService.deleteUser(userId);
+      return "User has been deleted";
+  }
+  ```
 
 ---
 
@@ -44,16 +100,27 @@ Hãy bổ sung thêm 2 chức năng còn thiếu:
 Trong `UserService.java`, đoạn code tạo User đang set thủ công từng trường (`user.setUsername(...)`, `user.setPassword(...)`...). Hãy cải tiến nó.
 
 **Yêu cầu:**
-Sử dụng **Lombok Builder** hoặc **MapStruct** (nếu muốn nâng cao) để convert từ DTO sang Entity gọn gàng hơn.
+Sử dụng **Lombok Builder** để convert từ DTO sang Entity gọn gàng hơn.
 
 ### Gợi ý (Hint)
 - Trong `User.java` đã có `@Builder`.
-- Thay vì `new User()` và set từng dòng, bạn có thể dùng:
+- Thay vì `new User()` và set từng dòng:
   ```java
+  // Code cũ (Manual setter)
+  User user = new User();
+  user.setUsername(request.getUsername());
+  user.setPassword(request.getPassword());
+  // ...
+  ```
+- Hãy đổi thành:
+  ```java
+  // Code mới (Builder pattern)
   User user = User.builder()
       .username(request.getUsername())
       .password(request.getPassword())
-      // ... các trường khác
+      .firstName(request.getFirstName())
+      .lastName(request.getLastName())
+      .dob(request.getDob())
       .build();
   ```
 
@@ -68,13 +135,39 @@ Hiện tại người dùng có thể gửi `username` rỗng hoặc `password` 
 2.  `password`: Tối thiểu 8 ký tự.
 
 ### Gợi ý (Hint)
-- Thêm dependency `spring-boot-starter-validation` vào `pom.xml` (nếu chưa có).
-- Trong `UserCreationRequest.java`:
-    - Dùng annotation `@Size(min = 3, message = "Username must be at least 3 characters")` trên field `username`.
-    - Dùng `@Size(min = 8, ...)` trên field `password`.
-- Trong `UserController.java`:
-    - Thêm `@Valid` trước tham số `UserCreationRequest request`.
-    - *Nâng cao*: Tìm hiểu cách bắt lỗi `MethodArgumentNotValidException` để trả về thông báo lỗi đẹp hơn (dùng `@ControllerAdvice`).
+- **Bước 1: Thêm Dependency** (nếu chưa có trong `pom.xml`)
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+  </dependency>
+  ```
+
+- **Bước 2: Thêm Annotation vào DTO (`UserCreationRequest.java`)**
+  ```java
+  import jakarta.validation.constraints.Size;
+
+  public class UserCreationRequest {
+      @Size(min = 3, message = "Username must be at least 3 characters")
+      String username;
+
+      @Size(min = 8, message = "Password must be at least 8 characters")
+      String password;
+      
+      // ... các trường khác giữ nguyên
+  }
+  ```
+
+- **Bước 3: Kích hoạt Validation ở Controller (`UserController.java`)**
+  Thêm `@Valid` trước `@RequestBody`.
+  ```java
+  import jakarta.validation.Valid;
+
+  @PostMapping
+  User createUser(@RequestBody @Valid UserCreationRequest request) {
+      return userService.createUser(request);
+  }
+  ```
 
 ---
 
@@ -84,15 +177,31 @@ Hiện tại người dùng có thể gửi `username` rỗng hoặc `password` 
 Viết API tìm kiếm user theo `username` (gần đúng hoặc chính xác).
 
 ### Gợi ý (Hint)
-- **Repository**: Khai báo thêm hàm trong `UserRepository`:
+- **Repository (`UserRepository.java`)**:
+  Spring Data JPA hỗ trợ "Query Methods" - tự động tạo câu lệnh SQL dựa trên tên hàm.
   ```java
-  // Tìm chính xác
-  Optional<User> findByUsername(String username);
-  
-  // Hoặc tìm gần đúng (LIKE %username%)
-  List<User> findByUsernameContaining(String username);
+  public interface UserRepository extends JpaRepository<User, String> {
+      // Tìm user có username chứa chuỗi ký tự (LIKE %username%)
+      // VD: tìm "an" sẽ ra "hoangan", "annguyen"
+      List<User> findByUsernameContaining(String username);
+  }
   ```
-- **Service & Controller**: Kết nối tương tự các bài trên.
+
+- **Service (`UserService.java`)**:
+  ```java
+  public List<User> searchUsers(String keyword) {
+      return userRepository.findByUsernameContaining(keyword);
+  }
+  ```
+
+- **Controller (`UserController.java`)**:
+  ```java
+  // GET /users/search?keyword=abc
+  @GetMapping("/search")
+  List<User> searchUsers(@RequestParam("keyword") String keyword) {
+      return userService.searchUsers(keyword);
+  }
+  ```
 
 ---
 
@@ -107,5 +216,7 @@ Viết API tìm kiếm user theo `username` (gần đúng hoặc chính xác).
 | `@Repository` | Repository | Đánh dấu class giao tiếp DB. |
 | `@Entity` | Entity | Đánh dấu class ánh xạ với bảng trong DB. |
 | `@RequestBody` | Parameter | Map JSON từ body request vào Object Java. |
-| `@PathVariable` | Parameter | Lấy giá trị từ đường dẫn URL (VD: userId). |
+| `@PathVariable` | Parameter | Lấy giá trị từ đường dẫn URL (VD: `/users/{id}`). |
+| `@RequestParam` | Parameter | Lấy giá trị từ query param (VD: `/users?name=abc`). |
+| `@Valid` | Parameter | Kích hoạt kiểm tra validation cho object. |
 
