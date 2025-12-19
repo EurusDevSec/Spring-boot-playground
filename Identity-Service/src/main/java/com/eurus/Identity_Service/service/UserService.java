@@ -2,6 +2,7 @@ package com.eurus.Identity_Service.service;
 
 
 import com.eurus.Identity_Service.dto.request.UserCreationRequest;
+import com.eurus.Identity_Service.dto.request.UserUpdateRequest;
 import com.eurus.Identity_Service.entity.User;
 import com.eurus.Identity_Service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,4 +38,18 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("User not found"));
     }
+
+    //update User
+    public User updateUser(String userId, UserUpdateRequest request){
+        User user = getUser(userId); // Tan dung getUser o tren
+        // Cap nhat thong tin tu request vao user entity
+        user.setPassword(request.getPassword());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setDob(request.getDob());
+
+        //Luu xuong DB
+        return  userRepository.save(user);
+    }
+
 }
