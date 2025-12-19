@@ -2,6 +2,7 @@ package com.eurus.Identity_Service.service;
 
 
 import com.eurus.Identity_Service.dto.request.UserCreationRequest;
+import com.eurus.Identity_Service.dto.request.UserDeleteRequest;
 import com.eurus.Identity_Service.dto.request.UserUpdateRequest;
 import com.eurus.Identity_Service.entity.User;
 import com.eurus.Identity_Service.repository.UserRepository;
@@ -50,6 +51,14 @@ public class UserService {
 
         //Luu xuong DB
         return  userRepository.save(user);
+    }
+
+    //delete User
+    public void delteUser(String userId){
+
+        userRepository.deleteById(userId);
+
+        // Vi day la kieu void nen khong return ve gi ca
     }
 
 }
