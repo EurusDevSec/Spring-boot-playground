@@ -19,14 +19,13 @@ public class UserService {
 
     public User createUser(UserCreationRequest request){
         //1. Tao User moi
-        User user = new User();
-
-        //2. Chep du lie tu Request sang User
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setDob(request.getDob());
+        User user   = User.builder()
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .dob(request.getDob())
+                .build();
 
         //3. Goi Repository luu xuong DB
         return userRepository.save(user);
