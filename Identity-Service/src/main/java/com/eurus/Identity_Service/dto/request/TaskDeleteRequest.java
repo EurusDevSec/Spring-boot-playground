@@ -6,8 +6,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-@Data
-@NoArgsConstructor
+@Data // Su dung LomBok Data de tao san getter, setter
+@NoArgsConstructor //Tao san constructor khong có tham số
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
