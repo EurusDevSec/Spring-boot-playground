@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor //Tao san constructor khong có tham số
 @AllArgsConstructor//Tao constructor co tham số
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE) // Dat prive tu dong cho tat ca biến
 public class TaskDeleteRequest {
 
     String title;
