@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDate;
 import java.util.List;
 
-@Entity
+@Entity // Su dung @Entity nhan biet day la class Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
