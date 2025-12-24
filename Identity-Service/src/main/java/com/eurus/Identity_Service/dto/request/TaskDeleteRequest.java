@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data // Su dung LomBok Data de tao san getter, setter
 @NoArgsConstructor //Tao san constructor khong có tham số
 @AllArgsConstructor//Tao constructor co tham số
-@Builder
+@Builder// Su dung builder pattern
 @FieldDefaults(level = AccessLevel.PRIVATE) // Dat prive tu dong cho tat ca biến
 public class TaskDeleteRequest {
 
